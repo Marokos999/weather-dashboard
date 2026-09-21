@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Weather Dashboard</title>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  </head>
+  <body>
+    <!-- Alpine.js Favorites Widget (outside React root) -->
+    <div
+      x-data="{
+        favorites: JSON.parse(localStorage.getItem('weather-favorites') || '[]'),
+        addCity(city) {
+          if (!this.favorites.includes(city)) {
+            this.favorites.push(city);
+            localStorage.setItem('weather-favorites', JSON.stringify(this.favorites));
+          }
+        },
+        removeCity(city) {
+          this.favorites = this.favorites.filter(c => c !== city);
+          localStorage.setItem('weather-favorites', JSON.stringify(this.favorites));
+        },
+        searchCity(city) {
+          window.dispatchEvent(new CustomEvent('weather-search', { detail: city }));
+        }
+      }"
+      x-on:add-favorite.window="addCity($event.detail)"
+      x-on:remove-favorite.window="removeCity($event.detail)"
+      style="background:#1e293b; border-bottom:1px solid #334155; padding:8px 16px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; min-height:40px;"
+    >
+      <span style="font-size:12px; color:#64748b; font-family:system-ui; white-space:nowrap;">★ Favorites:</span>
+      <template x-if="favorites.length === 0">
+        <span style="font-size:12px; color:#475569; font-family:system-ui;">No favorites yet — star a city to save it</span>
+      </template>
+      <template x-for="city in favorites" :key="city">
+        <div style="display:flex; align-items:center; gap:4px;">
+          <button
+            x-on:click="searchCity(city)"
+            x-text="city"
+            style="font-size:12px; color:#94a3b8; background:#334155; border:none; border-radius:6px; padding:3px 10px; cursor:pointer; font-family:system-ui;"
+            onmouseover="this.style.color='#f1f5f9'"
+            onmouseout="this.style.color='#94a3b8'"
+          ></button>
+          <button
+            x-on:click="removeCity(city)"
+            style="font-size:10px; color:#475569; background:none; border:none; cursor:pointer; padding:0 2px; line-height:1;"
+            onmouseover="this.style.color='#ef4444'"
+            onmouseout="this.style.color='#475569'"
+          >✕</button>
+        </div>
+      </template>
+    </div>
+
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
