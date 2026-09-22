@@ -37,6 +37,7 @@ jobs:
         env:
           OWM_API_KEY: ${{ secrets.OWM_API_KEY }}
           REDIS_CONNECTION_STRING: ${{ secrets.REDIS_CONNECTION_STRING }}
+          VITE_OWM_API_KEY: ${{ secrets.OWM_API_KEY }}
 
   close_pull_request:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
