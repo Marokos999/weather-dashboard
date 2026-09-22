@@ -8,18 +8,33 @@ export default function HourlyForecast({ data, unit }) {
   }
 
   return (
-    <div className="bg-slate-800 rounded-2xl p-4">
-      <h3 className="text-sm font-semibold text-slate-400 mb-3 uppercase tracking-wider">Hourly</h3>
-      <div className="flex gap-3 overflow-x-auto pb-2">
+    <div style={{
+      background: 'rgba(255,255,255,0.05)',
+      border: '1px solid rgba(255,255,255,0.08)',
+      borderRadius: '20px',
+      padding: '24px',
+    }}>
+      <h3 style={{ fontSize: '11px', fontWeight: '600', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px' }}>
+        Hourly Forecast
+      </h3>
+      <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px' }}>
         {data.map((h, i) => (
-          <div key={i} className="flex flex-col items-center gap-1 min-w-[56px] bg-slate-700 rounded-xl p-2">
-            <span className="text-xs text-slate-400">{formatHour(h.time)}</span>
+          <div key={i} style={{
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
+            minWidth: '64px',
+            background: 'rgba(255,255,255,0.04)',
+            border: '1px solid rgba(255,255,255,0.06)',
+            borderRadius: '16px',
+            padding: '12px 8px',
+            flexShrink: 0,
+          }}>
+            <span style={{ fontSize: '11px', color: '#64748b' }}>{i === 0 ? 'Now' : formatHour(h.time)}</span>
             <img
               src={`https://openweathermap.org/img/wn/${h.icon}.png`}
               alt={h.description}
-              className="w-8 h-8"
+              style={{ width: '36px', height: '36px' }}
             />
-            <span className="text-sm font-semibold">{toDisplay(h.temperature)}</span>
+            <span style={{ fontSize: '14px', fontWeight: '600' }}>{toDisplay(h.temperature)}</span>
           </div>
         ))}
       </div>

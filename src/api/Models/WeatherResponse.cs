@@ -1,15 +1,17 @@
+using System.Text.Json.Serialization;
+
 namespace WeatherApi.Models;
 
 public class WeatherResponse
 {
-  public string City { get; set; } = string.Empty;
-  public string Country { get; set; } = string.Empty;
-  public double Temperature { get; set; }
-  public double FeelsLike { get; set; }
-  public int Humidity { get; set; }
-  public double WindSpeed { get; set; }
-  public string Description { get; set; } = string.Empty;
-  public string Icon { get; set; } = string.Empty;
-  public double Lat { get; set; }
-  public double Lon { get; set; }
+    [JsonPropertyName("city")] public string City { get; set; } = string.Empty;
+    [JsonPropertyName("country")] public string Country { get; set; } = string.Empty;
+    [JsonPropertyName("temperature")] public double Temperature { get; set; }
+    [JsonPropertyName("feelsLike")] public double FeelsLike { get; set; }
+    [JsonPropertyName("humidity")] public int Humidity { get; set; }
+    [JsonPropertyName("windSpeed")] public double WindSpeed { get; set; }
+    [JsonPropertyName("description")] public string Description { get; set; } = string.Empty;
+    [JsonPropertyName("icon")] public string Icon { get; set; } = string.Empty;
+    [JsonPropertyName("lat")] public double Lat { get; set; }
+    [JsonPropertyName("lon")] public double Lon { get; set; }
 }

@@ -1,8 +1,8 @@
+import { useState } from 'react'
+
 function isFavorite(city) {
-  try {
-    const favs = JSON.parse(localStorage.getItem('weather-favorites') || '[]')
-    return favs.includes(city)
-  } catch { return false }
+  try { return JSON.parse(localStorage.getItem('weather-favorites') || '[]').includes(city) }
+  catch { return false }
 }
 
 function toggleFavorite(city) {
@@ -10,65 +10,104 @@ function toggleFavorite(city) {
   window.dispatchEvent(new CustomEvent(fav ? 'remove-favorite' : 'add-favorite', { detail: city }))
 }
 
+const card = {
+  background: 'rgba(255,255,255,0.05)',
+  border: '1px solid rgba(255,255,255,0.08)',
+  borderRadius: '20px',
+  padding: '28px',
+}
+
 export default function CurrentWeather({ data, unit, onUnitToggle }) {
   const [starred, setStarred] = useState(() => isFavorite(data.city))
+
+  const toDisplay = (temp) =>
+    unit === 'F' ? `${Math.round(temp * 9 / 5 + 32)}°F` : `${Math.round(temp)}°C`
 
   const handleStar = () => {
     toggleFavorite(data.city)
     setStarred(s => !s)
   }
 
-  const toDisplay = (temp) => {
-    if (unit === 'F') return `${Math.round(temp * 9 / 5 + 32)}°F`
-    return `${Math.round(temp)}°C`
-  }
-
   return (
-    <div className="bg-slate-800 rounded-2xl p-6 flex flex-col gap-4">
-      <div className="flex items-start justify-between">
+    <div style={{
+      ...card,
+      background: 'linear-gradient(135deg, rgba(37,99,235,0.2) 0%, rgba(29,78,216,0.1) 100%)',
+      position: 'relative',
+      overflow: 'hidden',
+    }}>
+      {/* Decorative blur circle */}
+      <div style={{
+        position: 'absolute', top: '-40px', right: '-40px',
+        width: '200px', height: '200px',
+        background: 'rgba(96,165,250,0.08)',
+        borderRadius: '50%', filter: 'blur(40px)',
+        pointerEvents: 'none',
+      }} />
+
+      {/* Top row */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
         <div>
-          <h2 className="text-2xl font-bold">{data.city}, {data.country}</h2>
-          <p className="text-slate-400 capitalize">{data.description}</p>
+          <h2 style={{ fontSize: '24px', fontWeight: '700', marginBottom: '4px' }}>
+            {data.city}, {data.country}
+          </h2>
+          <p style={{ color: '#93c5fd', fontSize: '14px', textTransform: 'capitalize' }}>
+            {data.description}
+          </p>
         </div>
-        <div className="flex gap-2">
-          <button
-            onClick={handleStar}
-            className="text-lg leading-none"
-            title={starred ? 'Remove from favorites' : 'Add to favorites'}
-          >
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <button onClick={handleStar} style={{
+            background: 'none', border: 'none', fontSize: '22px',
+            cursor: 'pointer', lineHeight: 1, color: starred ? '#facc15' : '#475569',
+            transition: 'transform 0.15s',
+          }}>
             {starred ? '★' : '☆'}
           </button>
-          <button
-            onClick={onUnitToggle}
-            className="text-sm px-3 py-1 rounded-lg bg-slate-700 hover:bg-slate-600 transition-colors"
-          >
+          <button onClick={onUnitToggle} style={{
+            padding: '6px 14px', borderRadius: '10px',
+            background: 'rgba(255,255,255,0.08)',
+            border: '1px solid rgba(255,255,255,0.1)',
+            color: '#cbd5e1', fontSize: '12px', fontWeight: '600',
+            cursor: 'pointer',
+          }}>
             {unit === 'C' ? '°F' : '°C'}
           </button>
         </div>
       </div>
 
-      <div className="flex items-center gap-4">
+      {/* Temp row */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
         <img
           src={`https://openweathermap.org/img/wn/${data.icon}@2x.png`}
           alt={data.description}
-          className="w-16 h-16"
+          style={{ width: '80px', height: '80px', filter: 'drop-shadow(0 0 16px rgba(96,165,250,0.4))' }}
         />
-        <span className="text-6xl font-light">{toDisplay(data.temperature)}</span>
+        <div>
+          <div style={{ fontSize: '68px', fontWeight: '200', letterSpacing: '-2px', lineHeight: 1 }}>
+            {toDisplay(data.temperature)}
+          </div>
+          <div style={{ color: '#64748b', fontSize: '13px', marginTop: '4px' }}>
+            Feels like {toDisplay(data.feelsLike)}
+          </div>
+        </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-3 text-sm">
-        <div className="bg-slate-700 rounded-xl p-3">
-          <p className="text-slate-400">Feels like</p>
-          <p className="font-semibold">{toDisplay(data.feelsLike)}</p>
-        </div>
-        <div className="bg-slate-700 rounded-xl p-3">
-          <p className="text-slate-400">Humidity</p>
-          <p className="font-semibold">{data.humidity}%</p>
-        </div>
-        <div className="bg-slate-700 rounded-xl p-3">
-          <p className="text-slate-400">Wind</p>
-          <p className="font-semibold">{data.windSpeed} m/s</p>
-        </div>
+      {/* Stats */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+        {[
+          { label: 'Humidity', value: `${data.humidity}%` },
+          { label: 'Wind Speed', value: `${data.windSpeed} m/s` },
+        ].map(({ label, value }) => (
+          <div key={label} style={{
+            background: 'rgba(255,255,255,0.04)',
+            border: '1px solid rgba(255,255,255,0.06)',
+            borderRadius: '14px', padding: '16px',
+          }}>
+            <div style={{ color: '#475569', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '6px' }}>
+              {label}
+            </div>
+            <div style={{ fontSize: '22px', fontWeight: '600' }}>{value}</div>
+          </div>
+        ))}
       </div>
     </div>
   )

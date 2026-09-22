@@ -1,20 +1,28 @@
 @import "tailwindcss";
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body { width: 100%; min-height: 100vh; }
 
 body {
   font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
-  background: #0f172a;
+  background: linear-gradient(135deg, #0c1445 0%, #0a1628 40%, #0d1f3c 70%, #111827 100%);
   color: #f1f5f9;
   min-height: 100vh;
 }
 
-.leaflet-container {
-  height: 100%;
-  width: 100%;
-  border-radius: 0.75rem;
+#root { width: 100%; }
+
+.leaflet-container { height: 100%; width: 100%; border-radius: 1rem; }
+
+.glass {
+  background: rgba(255,255,255,0.06);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.1);
 }
+
+.scroll-x { overflow-x: auto; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.1) transparent; }
+.scroll-x::-webkit-scrollbar { height: 4px; }
+.scroll-x::-webkit-scrollbar-track { background: transparent; }
+.scroll-x::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 99px; }

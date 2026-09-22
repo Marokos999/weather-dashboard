@@ -5,24 +5,48 @@ export default function WeeklyForecast({ data, unit }) {
     unit === 'F' ? `${Math.round(temp * 9 / 5 + 32)}°` : `${Math.round(temp)}°`
 
   return (
-    <div className="bg-slate-800 rounded-2xl p-4">
-      <h3 className="text-sm font-semibold text-slate-400 mb-3 uppercase tracking-wider">7-Day Forecast</h3>
-      <div className="grid grid-cols-7 gap-2">
+    <div style={{
+      background: 'rgba(255,255,255,0.05)',
+      border: '1px solid rgba(255,255,255,0.08)',
+      borderRadius: '20px',
+      padding: '24px',
+    }}>
+      <h3 style={{ fontSize: '11px', fontWeight: '600', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px' }}>
+        7-Day Forecast
+      </h3>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
         {data.map((d, i) => {
           const day = DAYS[new Date(d.date).getDay()]
           return (
-            <div key={i} className="flex flex-col items-center gap-1 bg-slate-700 rounded-xl p-2 text-sm">
-              <span className="text-slate-400 text-xs">{i === 0 ? 'Today' : day}</span>
+            <div key={i} style={{
+              display: 'flex', alignItems: 'center', gap: '12px',
+              padding: '10px 12px',
+              borderRadius: '14px',
+              transition: 'background 0.15s',
+            }}
+              onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.04)'}
+              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+            >
+              <span style={{ width: '40px', fontSize: '13px', color: '#94a3b8', flexShrink: 0 }}>
+                {i === 0 ? 'Today' : day}
+              </span>
               <img
                 src={`https://openweathermap.org/img/wn/${d.icon}.png`}
                 alt={d.description}
-                className="w-8 h-8"
+                style={{ width: '32px', height: '32px', flexShrink: 0 }}
               />
-              <span className="font-semibold">{toDisplay(d.tempMax)}</span>
-              <span className="text-slate-400">{toDisplay(d.tempMin)}</span>
+              <span style={{ flex: 1, fontSize: '12px', color: '#64748b', textTransform: 'capitalize' }}>
+                {d.description}
+              </span>
               {d.precipitationProbability > 0 && (
-                <span className="text-blue-400 text-xs">{Math.round(d.precipitationProbability)}%</span>
+                <span style={{ fontSize: '12px', color: '#60a5fa', fontWeight: '500', flexShrink: 0 }}>
+                  {Math.round(d.precipitationProbability)}%
+                </span>
               )}
+              <div style={{ display: 'flex', gap: '8px', fontSize: '14px', fontWeight: '600', flexShrink: 0 }}>
+                <span style={{ color: '#475569' }}>{toDisplay(d.tempMin)}</span>
+                <span style={{ color: '#f1f5f9' }}>{toDisplay(d.tempMax)}</span>
+              </div>
             </div>
           )
         })}

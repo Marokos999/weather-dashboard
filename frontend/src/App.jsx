@@ -22,7 +22,7 @@ export default function App() {
       setWeather(w)
       setForecast(f)
     } catch (err) {
-      setError(err.response?.data ?? 'Failed to fetch weather data.')
+      setError(err.response?.data ?? 'City not found or service unavailable.')
     } finally {
       setLoading(false)
     }
@@ -35,23 +35,54 @@ export default function App() {
   }, [handleSearch])
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white">
-      <div className="max-w-4xl mx-auto px-4 py-8 flex flex-col gap-6">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold mb-2">Weather Dashboard</h1>
-          <p className="text-slate-400 text-sm mb-6">Powered by OpenWeatherMap · Cached with Redis</p>
-          <SearchBar onSearch={handleSearch} loading={loading} />
+    <div style={{ width: '100%', minHeight: '100vh', padding: '0' }}>
+      <div style={{ maxWidth: '900px', margin: '0 auto', padding: '40px 24px' }}>
+
+        {/* Header */}
+        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+          <div style={{ fontSize: '48px', marginBottom: '8px' }}>⛅</div>
+          <h1 style={{ fontSize: '36px', fontWeight: '800', letterSpacing: '-1px', marginBottom: '6px' }}>
+            Weather Dashboard
+          </h1>
+          <p style={{ color: '#64748b', fontSize: '13px' }}>
+            OpenWeatherMap · Redis Cache · Azure Functions
+          </p>
         </div>
 
+        {/* Search */}
+        <SearchBar onSearch={handleSearch} loading={loading} />
+
+        {/* Error */}
         {error && (
-          <div className="bg-red-900/40 border border-red-700 text-red-300 rounded-xl px-4 py-3 text-sm">
+          <div style={{
+            marginTop: '16px',
+            background: 'rgba(239,68,68,0.15)',
+            border: '1px solid rgba(239,68,68,0.3)',
+            borderRadius: '12px',
+            padding: '12px 16px',
+            color: '#fca5a5',
+            fontSize: '13px',
+            textAlign: 'center'
+          }}>
             {error}
           </div>
         )}
 
-        {weather && (
-          <>
-            <CurrentWeather data={weather} unit={unit} onUnitToggle={() => setUnit(u => u === 'C' ? 'F' : 'C')} />
+        {/* Loading */}
+        {loading && (
+          <div style={{ textAlign: 'center', color: '#475569', marginTop: '48px', fontSize: '14px' }}>
+            Loading...
+          </div>
+        )}
+
+        {/* Content */}
+        {weather && !loading && (
+          <div style={{ marginTop: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <CurrentWeather
+              data={weather}
+              unit={unit}
+              onUnitToggle={() => setUnit(u => u === 'C' ? 'F' : 'C')}
+            />
             {forecast && (
               <>
                 <HourlyForecast data={forecast.hourly} unit={unit} />
@@ -59,13 +90,19 @@ export default function App() {
               </>
             )}
             <WeatherMap lat={weather.lat} lon={weather.lon} />
-          </>
+          </div>
         )}
 
-        {!weather && !loading && (
-          <div className="text-center text-slate-500 mt-12">
-            <p className="text-5xl mb-4">⛅</p>
-            <p>Search for a city to see the weather</p>
+        {/* Empty state */}
+        {!weather && !loading && !error && (
+          <div style={{ textAlign: 'center', color: '#334155', marginTop: '80px' }}>
+            <div style={{ fontSize: '72px', marginBottom: '16px' }}>🌍</div>
+            <p style={{ fontSize: '18px', fontWeight: '600', color: '#475569', marginBottom: '6px' }}>
+              Search for any city
+            </p>
+            <p style={{ fontSize: '13px', color: '#334155' }}>
+              Current conditions · Hourly · 7-day forecast · Map
+            </p>
           </div>
         )}
       </div>

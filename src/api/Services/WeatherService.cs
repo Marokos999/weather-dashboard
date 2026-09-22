@@ -52,29 +52,34 @@ public class WeatherService : IWeatherService
         var cached = await _cache.GetAsync<ForecastResponse>(key);
         if (cached != null) return cached;
 
+        // Free tier: 5-day forecast with 3h intervals
         var json = await _http.GetFromJsonAsync<JsonElement>(
-            $"onecall?lat={lat}&lon={lon}&exclude=current,minutely,alerts&appid={_apiKey}&units=metric");
+            $"forecast?lat={lat}&lon={lon}&appid={_apiKey}&units=metric");
 
-        var result = new ForecastResponse
+        var items = json.GetProperty("list").EnumerateArray().ToList();
+
+        var hourly = items.Take(8).Select(h => new HourlyItem
         {
-            Hourly = json.GetProperty("hourly").EnumerateArray().Take(24).Select(h => new HourlyItem
-            {
-                Time = DateTimeOffset.FromUnixTimeSeconds(h.GetProperty("dt").GetInt64()).UtcDateTime,
-                Temperature = h.GetProperty("temp").GetDouble(),
-                Icon = h.GetProperty("weather")[0].GetProperty("icon").GetString()!,
-                Description = h.GetProperty("weather")[0].GetProperty("description").GetString()!
-            }).ToList(),
-            Daily = json.GetProperty("daily").EnumerateArray().Take(7).Select(d => new DailyItem
-            {
-                Date = DateTimeOffset.FromUnixTimeSeconds(d.GetProperty("dt").GetInt64()).UtcDateTime,
-                TempMin = d.GetProperty("temp").GetProperty("min").GetDouble(),
-                TempMax = d.GetProperty("temp").GetProperty("max").GetDouble(),
-                Icon = d.GetProperty("weather")[0].GetProperty("icon").GetString()!,
-                Description = d.GetProperty("weather")[0].GetProperty("description").GetString()!,
-                PrecipitationProbability = d.GetProperty("pop").GetDouble() * 100
-            }).ToList()
-        };
+            Time = DateTimeOffset.FromUnixTimeSeconds(h.GetProperty("dt").GetInt64()).UtcDateTime,
+            Temperature = h.GetProperty("main").GetProperty("temp").GetDouble(),
+            Icon = h.GetProperty("weather")[0].GetProperty("icon").GetString()!,
+            Description = h.GetProperty("weather")[0].GetProperty("description").GetString()!
+        }).ToList();
 
+        var daily = items
+            .GroupBy(h => DateTimeOffset.FromUnixTimeSeconds(h.GetProperty("dt").GetInt64()).UtcDateTime.Date)
+            .Take(7)
+            .Select(g => new DailyItem
+            {
+                Date = g.Key,
+                TempMin = g.Min(h => h.GetProperty("main").GetProperty("temp_min").GetDouble()),
+                TempMax = g.Max(h => h.GetProperty("main").GetProperty("temp_max").GetDouble()),
+                Icon = g.First().GetProperty("weather")[0].GetProperty("icon").GetString()!,
+                Description = g.First().GetProperty("weather")[0].GetProperty("description").GetString()!,
+                PrecipitationProbability = g.Max(h => h.TryGetProperty("pop", out var pop) ? pop.GetDouble() * 100 : 0)
+            }).ToList();
+
+        var result = new ForecastResponse { Hourly = hourly, Daily = daily };
         await _cache.SetAsync(key, result, TimeSpan.FromMinutes(10));
         return result;
     }
