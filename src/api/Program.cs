@@ -13,9 +13,13 @@ var host = new HostBuilder()
             client.BaseAddress = new Uri("https://api.openweathermap.org/data/2.5/");
         });
 
-        var redisConn = context.Configuration["REDIS_CONNECTION_STRING"] ?? "localhost:6379";
-        services.AddSingleton<IConnectionMultiplexer>(_ =>
-            ConnectionMultiplexer.Connect(redisConn));
+        var redisConn = context.Configuration["REDIS_CONNECTION_STRING"];
+        services.AddSingleton<IConnectionMultiplexer?>(_ =>
+        {
+            if (string.IsNullOrEmpty(redisConn)) return null;
+            try { return ConnectionMultiplexer.Connect(redisConn); }
+            catch { return null; }
+        });
 
         services.AddSingleton<IRedisCacheService, RedisCacheService>();
         services.AddScoped<IWeatherService, WeatherService>();
