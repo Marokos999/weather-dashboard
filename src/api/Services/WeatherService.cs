@@ -29,18 +29,53 @@ public class WeatherService : IWeatherService
         var json = await _http.GetFromJsonAsync<JsonElement>(
             $"weather?q={Uri.EscapeDataString(city)}&appid={_apiKey}&units=metric");
 
+        var sys = json.GetProperty("sys");
         var result = new WeatherResponse
         {
             City = json.GetProperty("name").GetString()!,
-            Country = json.GetProperty("sys").GetProperty("country").GetString()!,
+            Country = sys.GetProperty("country").GetString()!,
             Temperature = json.GetProperty("main").GetProperty("temp").GetDouble(),
             FeelsLike = json.GetProperty("main").GetProperty("feels_like").GetDouble(),
             Humidity = json.GetProperty("main").GetProperty("humidity").GetInt32(),
             WindSpeed = json.GetProperty("wind").GetProperty("speed").GetDouble(),
+            WindDeg = json.GetProperty("wind").GetProperty("deg").GetInt32(),
             Description = json.GetProperty("weather")[0].GetProperty("description").GetString()!,
             Icon = json.GetProperty("weather")[0].GetProperty("icon").GetString()!,
             Lat = json.GetProperty("coord").GetProperty("lat").GetDouble(),
-            Lon = json.GetProperty("coord").GetProperty("lon").GetDouble()
+            Lon = json.GetProperty("coord").GetProperty("lon").GetDouble(),
+            Sunrise = DateTimeOffset.FromUnixTimeSeconds(sys.GetProperty("sunrise").GetInt64()).UtcDateTime,
+            Sunset = DateTimeOffset.FromUnixTimeSeconds(sys.GetProperty("sunset").GetInt64()).UtcDateTime,
+        };
+
+        await _cache.SetAsync(key, result, TimeSpan.FromMinutes(10));
+        return result;
+    }
+
+    public async Task<WeatherResponse> GetCurrentByCoordsAsync(double lat, double lon)
+    {
+        var key = $"weather:current:coords:{lat:F2}:{lon:F2}";
+        var cached = await _cache.GetAsync<WeatherResponse>(key);
+        if (cached != null) return cached;
+
+        var json = await _http.GetFromJsonAsync<JsonElement>(
+            $"weather?lat={lat}&lon={lon}&appid={_apiKey}&units=metric");
+
+        var sys = json.GetProperty("sys");
+        var result = new WeatherResponse
+        {
+            City = json.GetProperty("name").GetString()!,
+            Country = sys.GetProperty("country").GetString()!,
+            Temperature = json.GetProperty("main").GetProperty("temp").GetDouble(),
+            FeelsLike = json.GetProperty("main").GetProperty("feels_like").GetDouble(),
+            Humidity = json.GetProperty("main").GetProperty("humidity").GetInt32(),
+            WindSpeed = json.GetProperty("wind").GetProperty("speed").GetDouble(),
+            WindDeg = json.GetProperty("wind").GetProperty("deg").GetInt32(),
+            Description = json.GetProperty("weather")[0].GetProperty("description").GetString()!,
+            Icon = json.GetProperty("weather")[0].GetProperty("icon").GetString()!,
+            Lat = json.GetProperty("coord").GetProperty("lat").GetDouble(),
+            Lon = json.GetProperty("coord").GetProperty("lon").GetDouble(),
+            Sunrise = DateTimeOffset.FromUnixTimeSeconds(sys.GetProperty("sunrise").GetInt64()).UtcDateTime,
+            Sunset = DateTimeOffset.FromUnixTimeSeconds(sys.GetProperty("sunset").GetInt64()).UtcDateTime,
         };
 
         await _cache.SetAsync(key, result, TimeSpan.FromMinutes(10));

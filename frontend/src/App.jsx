@@ -4,14 +4,27 @@ import CurrentWeather from './components/CurrentWeather'
 import HourlyForecast from './components/HourlyForecast'
 import WeeklyForecast from './components/WeeklyForecast'
 import WeatherMap from './components/WeatherMap'
-import { getWeather, getForecast } from './api/weather'
+import SkeletonCard from './components/SkeletonCard'
+import { getWeather, getWeatherByCoords, getForecast } from './api/weather'
+
+function getSavedUnit() {
+  try { return localStorage.getItem('weather-unit') || 'C' } catch { return 'C' }
+}
 
 export default function App() {
   const [weather, setWeather] = useState(null)
   const [forecast, setForecast] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
-  const [unit, setUnit] = useState('C')
+  const [unit, setUnit] = useState(getSavedUnit)
+
+  const handleUnitToggle = () => {
+    setUnit(u => {
+      const next = u === 'C' ? 'F' : 'C'
+      try { localStorage.setItem('weather-unit', next) } catch {}
+      return next
+    })
+  }
 
   const handleSearch = useCallback(async (city) => {
     setLoading(true)
@@ -28,6 +41,23 @@ export default function App() {
     }
   }, [])
 
+  const handleGeolocate = useCallback(async (lat, lon) => {
+    setLoading(true)
+    setError(null)
+    try {
+      const [w, f] = await Promise.all([
+        getWeatherByCoords(lat, lon),
+        getForecast(lat, lon),
+      ])
+      setWeather(w)
+      setForecast(f)
+    } catch {
+      setError('Unable to fetch weather for your location.')
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
   useEffect(() => {
     const handler = (e) => handleSearch(e.detail)
     window.addEventListener('weather-search', handler)
@@ -35,7 +65,7 @@ export default function App() {
   }, [handleSearch])
 
   return (
-    <div style={{ width: '100%', minHeight: '100vh', padding: '0' }}>
+    <div style={{ width: '100%', minHeight: '100vh' }}>
       <div style={{ maxWidth: '900px', margin: '0 auto', padding: '40px 24px' }}>
 
         {/* Header */}
@@ -50,7 +80,7 @@ export default function App() {
         </div>
 
         {/* Search */}
-        <SearchBar onSearch={handleSearch} loading={loading} />
+        <SearchBar onSearch={handleSearch} onGeolocate={handleGeolocate} loading={loading} />
 
         {/* Error */}
         {error && (
@@ -58,31 +88,24 @@ export default function App() {
             marginTop: '16px',
             background: 'rgba(239,68,68,0.15)',
             border: '1px solid rgba(239,68,68,0.3)',
-            borderRadius: '12px',
-            padding: '12px 16px',
-            color: '#fca5a5',
-            fontSize: '13px',
-            textAlign: 'center'
+            borderRadius: '12px', padding: '12px 16px',
+            color: '#fca5a5', fontSize: '13px', textAlign: 'center',
           }}>
             {error}
           </div>
         )}
 
-        {/* Loading */}
+        {/* Skeleton */}
         {loading && (
-          <div style={{ textAlign: 'center', color: '#475569', marginTop: '48px', fontSize: '14px' }}>
-            Loading...
+          <div style={{ marginTop: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <SkeletonCard />
           </div>
         )}
 
         {/* Content */}
         {weather && !loading && (
           <div style={{ marginTop: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <CurrentWeather
-              data={weather}
-              unit={unit}
-              onUnitToggle={() => setUnit(u => u === 'C' ? 'F' : 'C')}
-            />
+            <CurrentWeather data={weather} unit={unit} onUnitToggle={handleUnitToggle} />
             {forecast && (
               <>
                 <HourlyForecast data={forecast.hourly} unit={unit} />

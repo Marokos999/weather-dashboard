@@ -10,8 +10,11 @@ public class WeatherResponse
     [JsonPropertyName("feelsLike")] public double FeelsLike { get; set; }
     [JsonPropertyName("humidity")] public int Humidity { get; set; }
     [JsonPropertyName("windSpeed")] public double WindSpeed { get; set; }
+    [JsonPropertyName("windDeg")] public int WindDeg { get; set; }
     [JsonPropertyName("description")] public string Description { get; set; } = string.Empty;
     [JsonPropertyName("icon")] public string Icon { get; set; } = string.Empty;
     [JsonPropertyName("lat")] public double Lat { get; set; }
     [JsonPropertyName("lon")] public double Lon { get; set; }
+    [JsonPropertyName("sunrise")] public DateTime Sunrise { get; set; }
+    [JsonPropertyName("sunset")] public DateTime Sunset { get; set; }
 }

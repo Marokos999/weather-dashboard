@@ -11,11 +11,27 @@ function toggleFavorite(city) {
   window.dispatchEvent(new CustomEvent(fav ? 'remove-favorite' : 'add-favorite', { detail: city }))
 }
 
+function windDirection(deg) {
+  const dirs = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']
+  return dirs[Math.round(deg / 45) % 8]
+}
+
+function formatTime(utcIso) {
+  return new Date(utcIso + 'Z').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+}
+
 const card = {
   background: 'rgba(255,255,255,0.05)',
   border: '1px solid rgba(255,255,255,0.08)',
   borderRadius: '20px',
   padding: '28px',
+}
+
+const statBox = {
+  background: 'rgba(255,255,255,0.04)',
+  border: '1px solid rgba(255,255,255,0.06)',
+  borderRadius: '14px',
+  padding: '16px',
 }
 
 export default function CurrentWeather({ data, unit, onUnitToggle }) {
@@ -26,6 +42,13 @@ export default function CurrentWeather({ data, unit, onUnitToggle }) {
     setStarred(s => !s)
   }
 
+  const stats = [
+    { label: 'Humidity', value: `${data.humidity}%` },
+    { label: 'Wind', value: `${data.windSpeed} m/s ${windDirection(data.windDeg)}` },
+    { label: 'Sunrise', value: formatTime(data.sunrise) },
+    { label: 'Sunset', value: formatTime(data.sunset) },
+  ]
+
   return (
     <div style={{
       ...card,
@@ -33,7 +56,6 @@ export default function CurrentWeather({ data, unit, onUnitToggle }) {
       position: 'relative',
       overflow: 'hidden',
     }}>
-      {/* Decorative blur circle */}
       <div style={{
         position: 'absolute', top: '-40px', right: '-40px',
         width: '200px', height: '200px',
@@ -56,7 +78,6 @@ export default function CurrentWeather({ data, unit, onUnitToggle }) {
           <button onClick={handleStar} style={{
             background: 'none', border: 'none', fontSize: '22px',
             cursor: 'pointer', lineHeight: 1, color: starred ? '#facc15' : '#475569',
-            transition: 'transform 0.15s',
           }}>
             {starred ? '★' : '☆'}
           </button>
@@ -81,29 +102,22 @@ export default function CurrentWeather({ data, unit, onUnitToggle }) {
         />
         <div>
           <div style={{ fontSize: '68px', fontWeight: '200', letterSpacing: '-2px', lineHeight: 1 }}>
-            {toDisplay(data.temperature)}
+            {toDisplay(data.temperature, unit)}
           </div>
           <div style={{ color: '#64748b', fontSize: '13px', marginTop: '4px' }}>
-            Feels like {toDisplay(data.feelsLike)}
+            Feels like {toDisplay(data.feelsLike, unit)}
           </div>
         </div>
       </div>
 
-      {/* Stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-        {[
-          { label: 'Humidity', value: `${data.humidity}%` },
-          { label: 'Wind Speed', value: `${data.windSpeed} m/s` },
-        ].map(({ label, value }) => (
-          <div key={label} style={{
-            background: 'rgba(255,255,255,0.04)',
-            border: '1px solid rgba(255,255,255,0.06)',
-            borderRadius: '14px', padding: '16px',
-          }}>
+      {/* Stats - 4 boxes */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '12px' }}>
+        {stats.map(({ label, value }) => (
+          <div key={label} style={statBox}>
             <div style={{ color: '#475569', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '6px' }}>
               {label}
             </div>
-            <div style={{ fontSize: '22px', fontWeight: '600' }}>{value}</div>
+            <div style={{ fontSize: '16px', fontWeight: '600' }}>{value}</div>
           </div>
         ))}
       </div>

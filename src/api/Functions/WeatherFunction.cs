@@ -22,16 +22,23 @@ public class WeatherFunction
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "weather")] HttpRequestData req)
     {
         var city = req.Query["city"];
-        if (string.IsNullOrEmpty(city))
+        var latStr = req.Query["lat"];
+        var lonStr = req.Query["lon"];
+
+        if (string.IsNullOrEmpty(city) && (string.IsNullOrEmpty(latStr) || string.IsNullOrEmpty(lonStr)))
         {
             var bad = req.CreateResponse(HttpStatusCode.BadRequest);
-            await bad.WriteStringAsync("Query param 'city' is required.");
+            await bad.WriteStringAsync("Query param 'city' or 'lat'+'lon' is required.");
             return bad;
         }
 
         try
         {
-            var result = await _weather.GetCurrentAsync(city);
+            WeatherResponse result;
+            if (!string.IsNullOrEmpty(latStr) && double.TryParse(latStr, out var lat) && double.TryParse(lonStr, out var lon))
+                result = await _weather.GetCurrentByCoordsAsync(lat, lon);
+            else
+                result = await _weather.GetCurrentAsync(city!);
             var response = req.CreateResponse(HttpStatusCode.OK);
             await response.WriteAsJsonAsync(result);
             return response;
