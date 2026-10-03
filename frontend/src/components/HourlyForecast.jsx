@@ -1,7 +1,6 @@
-export default function HourlyForecast({ data, unit }) {
-  const toDisplay = (temp) =>
-    unit === 'F' ? `${Math.round(temp * 9 / 5 + 32)}°` : `${Math.round(temp)}°`
+import { toDisplayShort } from '../utils/temperature'
 
+export default function HourlyForecast({ data, unit }) {
   const formatHour = (iso) => {
     const d = new Date(iso)
     return d.getHours().toString().padStart(2, '0') + ':00'
@@ -18,8 +17,8 @@ export default function HourlyForecast({ data, unit }) {
         Hourly Forecast
       </h3>
       <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px' }}>
-        {data.map((h, i) => (
-          <div key={i} style={{
+        {data.map((h) => (
+          <div key={h.time} style={{
             display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
             minWidth: '64px',
             background: 'rgba(255,255,255,0.04)',
@@ -34,7 +33,7 @@ export default function HourlyForecast({ data, unit }) {
               alt={h.description}
               style={{ width: '36px', height: '36px' }}
             />
-            <span style={{ fontSize: '14px', fontWeight: '600' }}>{toDisplay(h.temperature)}</span>
+            <span style={{ fontSize: '14px', fontWeight: '600' }}>{toDisplayShort(h.temperature, unit)}</span>
           </div>
         ))}
       </div>

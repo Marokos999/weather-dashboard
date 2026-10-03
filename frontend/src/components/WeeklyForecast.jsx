@@ -1,8 +1,8 @@
+import { toDisplayShort } from '../utils/temperature'
+
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 export default function WeeklyForecast({ data, unit }) {
-  const toDisplay = (temp) =>
-    unit === 'F' ? `${Math.round(temp * 9 / 5 + 32)}°` : `${Math.round(temp)}°`
 
   return (
     <div style={{
@@ -15,10 +15,10 @@ export default function WeeklyForecast({ data, unit }) {
         7-Day Forecast
       </h3>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-        {data.map((d, i) => {
+        {data.map((d) => {
           const day = DAYS[new Date(d.date).getDay()]
           return (
-            <div key={i} style={{
+            <div key={d.date} style={{
               display: 'flex', alignItems: 'center', gap: '12px',
               padding: '10px 12px',
               borderRadius: '14px',
@@ -44,8 +44,8 @@ export default function WeeklyForecast({ data, unit }) {
                 </span>
               )}
               <div style={{ display: 'flex', gap: '8px', fontSize: '14px', fontWeight: '600', flexShrink: 0 }}>
-                <span style={{ color: '#475569' }}>{toDisplay(d.tempMin)}</span>
-                <span style={{ color: '#f1f5f9' }}>{toDisplay(d.tempMax)}</span>
+                <span style={{ color: '#475569' }}>{toDisplayShort(d.tempMin, unit)}</span>
+                <span style={{ color: '#f1f5f9' }}>{toDisplayShort(d.tempMax, unit)}</span>
               </div>
             </div>
           )

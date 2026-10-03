@@ -16,7 +16,8 @@ public class WeatherService : IWeatherService
     {
         _http = factory.CreateClient("openweather");
         _cache = cache;
-        _apiKey = config["OWM_API_KEY"] ?? "YOUR_OWM_API_KEY";
+        _apiKey = config["OWM_API_KEY"]
+            ?? throw new InvalidOperationException("OWM_API_KEY configuration is missing.");
     }
 
     public async Task<WeatherResponse> GetCurrentAsync(string city)
@@ -26,7 +27,7 @@ public class WeatherService : IWeatherService
         if (cached != null) return cached;
 
         var json = await _http.GetFromJsonAsync<JsonElement>(
-            $"weather?q={city}&appid={_apiKey}&units=metric");
+            $"weather?q={Uri.EscapeDataString(city)}&appid={_apiKey}&units=metric");
 
         var result = new WeatherResponse
         {
@@ -87,7 +88,7 @@ public class WeatherService : IWeatherService
     public async Task<(double Lat, double Lon)> GeocodeAsync(string query)
     {
         var json = await _http.GetFromJsonAsync<JsonElement[]>(
-            $"https://api.openweathermap.org/geo/1.0/direct?q={query}&limit=1&appid={_apiKey}");
+            $"https://api.openweathermap.org/geo/1.0/direct?q={Uri.EscapeDataString(query)}&limit=1&appid={_apiKey}");
 
         if (json == null || json.Length == 0)
             throw new Exception($"City not found: {query}");

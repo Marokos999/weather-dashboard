@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { toDisplay } from '../utils/temperature'
 
 function isFavorite(city) {
   try { return JSON.parse(localStorage.getItem('weather-favorites') || '[]').includes(city) }
@@ -19,9 +20,6 @@ const card = {
 
 export default function CurrentWeather({ data, unit, onUnitToggle }) {
   const [starred, setStarred] = useState(() => isFavorite(data.city))
-
-  const toDisplay = (temp) =>
-    unit === 'F' ? `${Math.round(temp * 9 / 5 + 32)}°F` : `${Math.round(temp)}°C`
 
   const handleStar = () => {
     toggleFavorite(data.city)
