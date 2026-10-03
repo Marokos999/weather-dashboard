@@ -16,7 +16,7 @@
     "exclude": ["/api/*", "/_framework/*", "/assets/*"]
   },
   "globalHeaders": {
-    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Origin": "https://happy-mud-0d2ce4f10.azurestaticapps.net",
     "Cache-Control": "no-cache"
   },
   "mimeTypes": {

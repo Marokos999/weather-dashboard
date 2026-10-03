@@ -5,7 +5,7 @@ import HourlyForecast from './components/HourlyForecast'
 import WeeklyForecast from './components/WeeklyForecast'
 import WeatherMap from './components/WeatherMap'
 import SkeletonCard from './components/SkeletonCard'
-import { getWeather, getWeatherByCoords, getForecast } from './api/weather'
+import { getWeatherFull, getWeatherFullByCoords } from './api/weather'
 
 function getSavedUnit() {
   try { return localStorage.getItem('weather-unit') || 'C' } catch { return 'C' }
@@ -30,8 +30,7 @@ export default function App() {
     setLoading(true)
     setError(null)
     try {
-      const w = await getWeather(city)
-      const f = await getForecast(w.lat, w.lon)
+      const { weather: w, forecast: f } = await getWeatherFull(city)
       setWeather(w)
       setForecast(f)
     } catch (err) {
@@ -45,10 +44,7 @@ export default function App() {
     setLoading(true)
     setError(null)
     try {
-      const [w, f] = await Promise.all([
-        getWeatherByCoords(lat, lon),
-        getForecast(lat, lon),
-      ])
+      const { weather: w, forecast: f } = await getWeatherFullByCoords(lat, lon)
       setWeather(w)
       setForecast(f)
     } catch {
