@@ -1,6 +1,6 @@
 # Weather Dashboard
 
-> **Project 05/20** — Serverless weather app with Redis caching proxy, built as part of a cloud-native portfolio series.
+
 
 **Live demo:** https://happy-mud-0d2ce4f10.azurestaticapps.net
 
