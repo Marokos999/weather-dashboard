@@ -1,9 +1,5 @@
 # Weather Dashboard
 
-
-
-**Live demo:** https://happy-mud-0d2ce4f10.azurestaticapps.net
-
 ---
 
 ## Features
