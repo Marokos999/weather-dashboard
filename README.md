@@ -43,7 +43,7 @@ OpenWeatherMap   Redis Cache (10-min TTL)
 
 | Layer | Technology |
 |---|---|
-| Frontend | React 18, Vite, Tailwind CSS v4 |
+| Frontend | React 19, Vite, Tailwind CSS v4 |
 | Widgets | Alpine.js 3 |
 | Map | Leaflet.js + react-leaflet |
 | Backend | Azure Functions v4, .NET 9 isolated worker |
@@ -56,31 +56,29 @@ OpenWeatherMap   Redis Cache (10-min TTL)
 
 ## Local Development
 
-### Prerequisites
-- .NET 9 SDK
-- Node.js 20+
-- Azure Functions Core Tools v4
-- Docker (for local Redis)
-
-### Backend
+### Docker (recommended)
 
 ```bash
-# Start Redis
-docker run -d -p 6379:6379 --name redis-weather redis:alpine
+# Copy and fill in your API key
+cp .env.example .env
+# Edit .env: OWM_API_KEY=your_key_here
 
-# Set environment variables in src/api/local.settings.json
-# (OWM_API_KEY, REDIS_CONNECTION_STRING)
-
-cd src/api
-func start
+docker compose up --build
 ```
 
-### Frontend
+App available at `http://localhost:3000`.
+
+### Manual
+
+#### Prerequisites
+- .NET 9 SDK, Node.js 20+, Azure Functions Core Tools v4
 
 ```bash
-cd frontend
-npm install
-npm run dev
+# Backend (src/api/local.settings.json must have OWM_API_KEY)
+cd src/api && func start
+
+# Frontend (separate terminal)
+cd frontend && npm install && npm run dev
 ```
 
 Frontend proxies `/api/*` to `http://localhost:7071` via Vite config.
@@ -102,10 +100,11 @@ Frontend proxies `/api/*` to `http://localhost:7071` via Vite config.
 weather-dashboard/
 ├── src/api/                    # Azure Functions (.NET 9)
 │   ├── Functions/
-│   │   ├── WeatherFunction.cs  # GET /api/weather
-│   │   ├── ForecastFunction.cs # GET /api/forecast
-│   │   ├── GeocodeFunction.cs  # GET /api/geocode
-│   │   └── MapTileFunction.cs  # GET /api/map/{layer}/{z}/{x}/{y}
+│   │   ├── WeatherFunction.cs      # GET /api/weather
+│   │   ├── WeatherFullFunction.cs  # GET /api/weather-full (combined)
+│   │   ├── ForecastFunction.cs     # GET /api/forecast
+│   │   ├── GeocodeFunction.cs      # GET /api/geocode
+│   │   └── MapTileFunction.cs      # GET /api/map/{layer}/{z}/{x}/{y}
 │   ├── Services/
 │   │   ├── WeatherService.cs
 │   │   └── RedisCacheService.cs
