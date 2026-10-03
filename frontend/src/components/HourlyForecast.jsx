@@ -17,7 +17,7 @@ export default function HourlyForecast({ data, unit }) {
         Hourly Forecast
       </h3>
       <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px' }}>
-        {data.map((h) => (
+        {data.map((h, i) => (
           <div key={h.time} style={{
             display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
             minWidth: '64px',

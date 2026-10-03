@@ -15,7 +15,7 @@ export default function WeeklyForecast({ data, unit }) {
         7-Day Forecast
       </h3>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-        {data.map((d) => {
+        {data.map((d, i) => {
           const day = DAYS[new Date(d.date).getDay()]
           return (
             <div key={d.date} style={{

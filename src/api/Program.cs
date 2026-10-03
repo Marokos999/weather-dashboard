@@ -14,11 +14,11 @@ var host = new HostBuilder()
         });
 
         var redisConn = context.Configuration["REDIS_CONNECTION_STRING"];
-        services.AddSingleton<IConnectionMultiplexer?>(_ =>
+        services.AddSingleton<IConnectionMultiplexer>(_ =>
         {
-            if (string.IsNullOrEmpty(redisConn)) return null;
+            if (string.IsNullOrEmpty(redisConn)) return null!;
             try { return ConnectionMultiplexer.Connect(redisConn); }
-            catch { return null; }
+            catch { return null!; }
         });
 
         services.AddSingleton<IRedisCacheService, RedisCacheService>();
