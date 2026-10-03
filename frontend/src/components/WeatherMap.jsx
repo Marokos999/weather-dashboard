@@ -1,4 +1,4 @@
-import { MapContainer, TileLayer, useMap } from 'react-leaflet'
+import { MapContainer, TileLayer, Pane, useMap } from 'react-leaflet'
 import { useEffect, useState } from 'react'
 import 'leaflet/dist/leaflet.css'
 
@@ -62,11 +62,13 @@ export default function WeatherMap({ lat, lon }) {
             attribution='&copy; <a href="https://www.esri.com">Esri</a>'
             url="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}"
           />
-          <TileLayer
-            key={activeLayer}
-            url={`/api/map/${activeLayer}/{z}/{x}/{y}`}
-            opacity={0.6}
-          />
+          <Pane name="weather-overlay" style={{ mixBlendMode: 'screen', zIndex: 450 }}>
+            <TileLayer
+              key={activeLayer}
+              url={`/api/map/${activeLayer}/{z}/{x}/{y}`}
+              opacity={1}
+            />
+          </Pane>
           <MapUpdater lat={lat} lon={lon} />
         </MapContainer>
       </div>
