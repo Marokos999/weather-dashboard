@@ -1,0 +1,22 @@
+services:
+  redis:
+    image: redis:alpine
+    restart: unless-stopped
+
+  api:
+    build: ./src/api
+    restart: unless-stopped
+    environment:
+      - OWM_API_KEY=${OWM_API_KEY}
+      - REDIS_CONNECTION_STRING=redis:6379
+      - AzureWebJobsStorage=UseDevelopmentStorage=true
+      - FUNCTIONS_WORKER_RUNTIME=dotnet-isolated
+    depends_on:
+      - redis
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - api
